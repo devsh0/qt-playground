@@ -22,7 +22,8 @@ private:
 private slots:
     void readBuffer();
     void onDecodeFinished();
-    void onAudioOutputStateChanged(QAudio::State);
+    void onStateChanged(QAudio::State);
+    void processNotification();
 
 public:
     explicit Decoder(QObject* parent, const QString&);
