@@ -1,10 +1,15 @@
+#include "Player.h"
 #include <QApplication>
 #include <QAudioFormat>
-#include "Decoder.h"
 
-QString getSource ()
+QString getPrimarySource()
 {
     return "/home/ragnarok/CLionProjects/qt-playground/test.mp3";
+}
+
+QString getSecondarySource()
+{
+    return "/home/ragnarok/CLionProjects/qt-playground/test2.mp3";
 }
 
 QAudioFormat getAudioFormat()
@@ -19,12 +24,12 @@ QAudioFormat getAudioFormat()
     return format;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     QApplication application(argc, argv);
-    auto source = getSource();
+    auto primary_source = getPrimarySource();
+    auto secondary_source = getSecondarySource();
     auto format = getAudioFormat();
-    Decoder decoder;
-    decoder.decodeFile(source, format);
+
     return application.exec();
 }

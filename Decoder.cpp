@@ -14,12 +14,12 @@ void Decoder::resetDecoder()
     m_decoder.stop();
 }
 
-QByteArray Decoder::decodeFile(const QString& source, const QAudioFormat& format)
+void Decoder::decodeFile(const QString& source, const QAudioFormat& format)
 {
+    resetDecoder();
     m_decoder.setSourceFilename(source);
     m_decoder.setAudioFormat(format);
     m_decoder.start();
-    return m_decode_buffer;
 }
 
 void Decoder::handleBufferReady()
@@ -35,12 +35,11 @@ void Decoder::handleDecodeFinished()
 {
     qDebug() << "Decode finished: " << m_decode_buffer.size() << "\n";
     emit decodeFinished(m_decode_buffer);
-    resetDecoder();
 }
 
 void Decoder::handleSourceChanged()
 {
-    resetDecoder();
+    qDebug() << "Interrupt has been raised!\n";
     emit decodeInterrupted();
 }
 

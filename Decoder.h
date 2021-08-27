@@ -1,14 +1,13 @@
 #pragma once
 
-#include <QtMultimedia/QAudioFormat>
-#include <QtMultimedia/QAudioDecoder>
-#include <QtMultimedia/QMediaPlayer>
 #include <QAudioOutput>
 #include <QBuffer>
+#include <QtMultimedia/QAudioDecoder>
+#include <QtMultimedia/QAudioFormat>
+#include <QtMultimedia/QMediaPlayer>
 
-class Decoder : public QObject
-{
-Q_OBJECT
+class Decoder : public QObject {
+    Q_OBJECT
 
 private:
     QAudioDecoder m_decoder;
@@ -24,10 +23,10 @@ private slots:
 public:
     Decoder();
 
-    QByteArray decodeFile(const QString &source, const QAudioFormat &format);
+    void decodeFile(const QString& source, const QAudioFormat& format);
     size_t getDecodedDataSize() const;
 
-    signals:
-    void decodeFinished(QByteArray&);
+signals:
+    void decodeFinished(const QByteArray&);
     void decodeInterrupted();
 };
