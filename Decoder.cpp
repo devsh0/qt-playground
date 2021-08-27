@@ -1,71 +1,50 @@
 #include "Decoder.h"
-#include <iostream>
 #include <QBuffer>
 
-Decoder::Decoder(QObject *parent, const QString& source) :
-        QObject(parent)
+Decoder::Decoder()
 {
-    QAudioFormat audio_format;
-    audio_format.setChannelCount(2);
-    audio_format.setCodec("audio/pcm");
-    audio_format.setSampleType(QAudioFormat::SignedInt);
-    audio_format.setByteOrder(QAudioFormat::BigEndian);
-    audio_format.setSampleRate(44100);
-    audio_format.setSampleSize(16);
-
-    setupAudioOutputDevice(audio_format);
-    setupDecoder(audio_format, source);
-    m_decoder.start();
+    connect(&m_decoder, SIGNAL(bufferReady()), this, SLOT(handleBufferReady()));
+    connect(&m_decoder, SIGNAL(finished()), this, SLOT(handleDecodeFinished()));
+    connect(&m_decoder, SIGNAL(sourceChanged()), this, SLOT(handleSourceChanged()));
 }
 
-void Decoder::setupDecoder(const QAudioFormat& format, const QString& source)
+void Decoder::resetDecoder()
 {
-    m_decoder.setAudioFormat(format);
+    m_decode_buffer.clear();
+    m_decoder.stop();
+}
+
+QByteArray Decoder::decodeFile(const QString& source, const QAudioFormat& format)
+{
     m_decoder.setSourceFilename(source);
-    connect(&m_decoder, SIGNAL(bufferReady()), this, SLOT(readBuffer()));
-    connect(&m_decoder, SIGNAL(finished()), this, SLOT(onDecodeFinished()));
-    connect(m_audio_output, SIGNAL(notify()), this, SLOT(processNotification()));
-    connect(m_audio_output, SIGNAL(stateChanged(QAudio::State)), this, SLOT(onStateChanged(QAudio::State)));
+    m_decoder.setAudioFormat(format);
+    m_decoder.start();
+    return m_decode_buffer;
 }
 
-void Decoder::setupAudioOutputDevice(const QAudioFormat& format)
-{
-    m_audio_output = new QAudioOutput(QAudioDeviceInfo::defaultOutputDevice(), format);
-    m_audio_output->setNotifyInterval(1000);
-    m_buffer.open(QBuffer::ReadWrite);
-    m_audio_output->start(&m_buffer);
-}
-
-void Decoder::readBuffer()
+void Decoder::handleBufferReady()
 {
     auto audio_buffer = m_decoder.read();
-    m_buffer.write((char*)audio_buffer.data(), audio_buffer.byteCount());
+    char* data = (char*)audio_buffer.data();
+    size_t size = audio_buffer.byteCount();
+    for (size_t i = 0; i < size; i++)
+        m_decode_buffer.append(data[i]);
 }
 
-void Decoder::onDecodeFinished()
+void Decoder::handleDecodeFinished()
 {
-    m_decoder.stop();
-    m_buffer.seek(0);
+    qDebug() << "Decode finished: " << m_decode_buffer.size() << "\n";
+    emit decodeFinished(m_decode_buffer);
+    resetDecoder();
 }
 
-void Decoder::onStateChanged(QAudio::State state)
+void Decoder::handleSourceChanged()
 {
-    switch(state) {
-        case QAudio::StoppedState:
-            qDebug() << "AudioOutput device stopped.\n";
-            break;
-        case QAudio::IdleState:
-            qDebug() << "AudioOutput device idling.\n";
-            break;
-        default:
-            qDebug() << "Whatever it is we don't care.\n";
-            break;
-    }
+    resetDecoder();
+    emit decodeInterrupted();
 }
 
-void Decoder::processNotification()
+size_t Decoder::getDecodedDataSize() const
 {
-    double seconds = m_audio_output->processedUSecs() * 1e-6;
-    qDebug() << "Processed audio duration: " << seconds << "\n";
-    m_buffer.seek(m_buffer.pos() + 1000000);
+    return m_decode_buffer.size();
 }

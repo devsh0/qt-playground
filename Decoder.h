@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QWidget>
 #include <QtMultimedia/QAudioFormat>
 #include <QtMultimedia/QAudioDecoder>
 #include <QtMultimedia/QMediaPlayer>
@@ -9,22 +8,26 @@
 
 class Decoder : public QObject
 {
-    Q_OBJECT
+Q_OBJECT
 
 private:
     QAudioDecoder m_decoder;
-    QBuffer m_buffer;
-    QAudioOutput* m_audio_output;
+    QByteArray m_decode_buffer;
 
-    void setupDecoder(const QAudioFormat&, const QString&);
-    void setupAudioOutputDevice(const QAudioFormat&);
-
+    void resetDecoder();
 private slots:
-    void readBuffer();
-    void onDecodeFinished();
-    void onStateChanged(QAudio::State);
-    void processNotification();
+
+    void handleBufferReady();
+    void handleDecodeFinished();
+    void handleSourceChanged();
 
 public:
-    explicit Decoder(QObject* parent, const QString&);
+    Decoder();
+
+    QByteArray decodeFile(const QString &source, const QAudioFormat &format);
+    size_t getDecodedDataSize() const;
+
+    signals:
+    void decodeFinished(QByteArray&);
+    void decodeInterrupted();
 };
