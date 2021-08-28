@@ -10,6 +10,12 @@ Player::Player(const QAudioFormat& format)
     , m_stop_button("Stop", this)
     , m_change_song_button("Change", this)
 {
+    setupGUI();
+    connect(&m_decoder, SIGNAL(decodeFinished(const QByteArray&)), &m_device, SLOT(playSamples(const QByteArray&)));
+}
+
+void Player::setupGUI()
+{
     setFixedSize(600, 400);
     setWindowTitle("Music Player");
 
@@ -25,10 +31,7 @@ Player::Player(const QAudioFormat& format)
     connect(&m_resume_button, SIGNAL(clicked(bool)), this, SLOT(resumePlayback()));
     connect(&m_stop_button, SIGNAL(clicked(bool)), this, SLOT(stopPlayback()));
     connect(&m_change_song_button, SIGNAL(clicked(bool)), this, SLOT(setPlaybackSource()));
-
-    connect(&m_decoder, SIGNAL(decodeFinished(const QByteArray&)), &m_device, SLOT(playSamples(const QByteArray&)));
 }
-
 void Player::playAudioFile(const QString& source)
 {
     m_decoder.decodeFile(source);
