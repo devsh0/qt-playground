@@ -23,6 +23,9 @@ private slots:
 public:
     AudioOutput() = delete;
     explicit AudioOutput(const QAudioFormat& format, size_t);
+    void pausePlayback();
+    void resumePlayback();
+    void stopPlayback();
 
     ~AudioOutput() noexcept override;
 };

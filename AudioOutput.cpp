@@ -1,7 +1,6 @@
 #include "AudioOutput.h"
 #include "Decoder.h"
 
-// TODO: Clean this mess. Decoder SHOULD NOT be here.
 AudioOutput::AudioOutput(const QAudioFormat& format, size_t ms_notification_interval)
     : m_audio_output(new QAudioOutput(QAudioDeviceInfo::defaultOutputDevice(), format))
 {
@@ -13,7 +12,8 @@ void AudioOutput::setupAudioOutputDevice(const QAudioFormat& format, size_t ms_n
 {
     m_audio_output->setNotifyInterval(ms_notification_interval);
     m_audio_output->start(&m_buffer);
-    connect(m_audio_output, SIGNAL(notify()), this, SLOT(processNotification()));
+    // TODO: We will need this.
+    //connect(m_audio_output, SIGNAL(notify()), this, SLOT(processNotification()));
     connect(m_audio_output, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChange(QAudio::State)));
 }
 
@@ -42,13 +42,29 @@ void AudioOutput::resetDevice()
 {
     m_buffer.buffer().clear();
     m_buffer.seek(0);
+    m_audio_output->reset();
 }
 
 void AudioOutput::playSamples(const QByteArray& samples)
 {
-    resetDevice();
+    stopPlayback();
     m_buffer.buffer().append(samples);
     m_audio_output->start(&m_buffer);
+}
+
+void AudioOutput::pausePlayback()
+{
+    m_audio_output->suspend();
+}
+
+void AudioOutput::resumePlayback()
+{
+    m_audio_output->resume();
+}
+
+void AudioOutput::stopPlayback()
+{
+    resetDevice();
 }
 
 AudioOutput::~AudioOutput() noexcept

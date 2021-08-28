@@ -28,11 +28,10 @@ int main(int argc, char* argv[])
 {
     QApplication application(argc, argv);
     auto primary_source = getPrimarySource();
-    auto secondary_source = getSecondarySource();
     auto format = getAudioFormat();
 
     Player player(format);
     player.playAudioFile(primary_source);
-    player.playAudioFile(secondary_source);
+    player.show();
     return application.exec();
 }
