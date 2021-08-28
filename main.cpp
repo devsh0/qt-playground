@@ -31,5 +31,8 @@ int main(int argc, char* argv[])
     auto secondary_source = getSecondarySource();
     auto format = getAudioFormat();
 
+    Player player(format);
+    player.playAudioFile(primary_source);
+    player.playAudioFile(secondary_source);
     return application.exec();
 }

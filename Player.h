@@ -1,23 +1,15 @@
-#include <QObject>
-#include "Decoder.h"
 #include "AudioOutput.h"
+#include "Decoder.h"
+#include <QObject>
 
-class Player : public QObject
-{
-Q_OBJECT
+class Player : public QObject {
+    Q_OBJECT
 
 private:
     Decoder m_decoder;
-    // Why is it possible to create AudioOutput devices without parameters?
     AudioOutput m_device;
 
-void playAudioFile (const QString&);
-
 public:
-
-signals:
-    void pauseRequested();
-    void resumeRequested();
-    void stopRequested();
-    void skipRequested(unsigned seconds);
+    void playAudioFile(const QString&);
+    Player(const QAudioFormat&);
 };

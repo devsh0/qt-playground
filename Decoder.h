@@ -21,9 +21,9 @@ private slots:
     void handleSourceChanged();
 
 public:
-    Decoder();
+    explicit Decoder(const QAudioFormat&);
 
-    void decodeFile(const QString& source, const QAudioFormat& format);
+    void decodeFile(const QString& source);
     size_t getDecodedDataSize() const;
 
 signals:

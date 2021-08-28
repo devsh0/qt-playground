@@ -46,6 +46,7 @@ void AudioOutput::resetDevice()
 
 void AudioOutput::playSamples(const QByteArray& samples)
 {
+    resetDevice();
     m_buffer.buffer().append(samples);
     m_audio_output->start(&m_buffer);
 }

@@ -1,8 +1,9 @@
 #include "Decoder.h"
 #include <QBuffer>
 
-Decoder::Decoder()
+Decoder::Decoder(const QAudioFormat& format)
 {
+    m_decoder.setAudioFormat(format);
     connect(&m_decoder, SIGNAL(bufferReady()), this, SLOT(handleBufferReady()));
     connect(&m_decoder, SIGNAL(finished()), this, SLOT(handleDecodeFinished()));
     connect(&m_decoder, SIGNAL(sourceChanged()), this, SLOT(handleSourceChanged()));
@@ -14,11 +15,10 @@ void Decoder::resetDecoder()
     m_decoder.stop();
 }
 
-void Decoder::decodeFile(const QString& source, const QAudioFormat& format)
+void Decoder::decodeFile(const QString& source)
 {
     resetDecoder();
     m_decoder.setSourceFilename(source);
-    m_decoder.setAudioFormat(format);
     m_decoder.start();
 }
 
