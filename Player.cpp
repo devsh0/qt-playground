@@ -28,16 +28,18 @@ void Player::setupGUI()
     main_widget().setLayout(&main_layout());
     main_layout().setContentsMargins({0, 0, 0, 0});
 
+    int w = 100;
+    int h = w;
     auto* play_button = new CustomPlayButton(&main_widget());
-    play_button->setFixedSize(60, 60);
+    play_button->setFixedSize(w, h);
     main_layout().addWidget(play_button);
     
     auto* nav_left_button = new CustomPlaylistNavButton(this, true);
-    nav_left_button->setFixedSize(60, 60);
+    nav_left_button->setFixedSize(w, h);
     main_layout().addWidget(nav_left_button);
 
     auto* nav_right_button = new CustomPlaylistNavButton(this, false);
-    nav_right_button->setFixedSize(60, 60);
+    nav_right_button->setFixedSize(w, h);
     main_layout().addWidget(nav_right_button);
 
     setCentralWidget(&main_widget());
