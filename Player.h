@@ -2,6 +2,7 @@
 #include "Decoder.h"
 #include <QPushButton>
 #include <QMainWindow>
+#include <QPaintEvent>
 
 class Player : public QMainWindow {
     Q_OBJECT
@@ -9,14 +10,14 @@ class Player : public QMainWindow {
 private:
     Decoder m_decoder;
     AudioOutput m_device;
+    QWidget* m_widget;
+    QLayout* m_layout;
 
 private:
-    QPushButton m_pause_button;
-    QPushButton m_resume_button;
-    QPushButton m_stop_button;
-    QPushButton m_change_song_button;
     void setupGUI();
-
+    void setupSongInfoWidget(QWidget*);
+    inline QWidget& main_widget() { return *m_widget; }
+    inline QLayout& main_layout() { return *m_layout; };
 private slots:
     void pausePlayback();
     void resumePlayback();
@@ -24,6 +25,9 @@ private slots:
     void setPlaybackSource();
 
 public:
-    void playAudioFile(const QString&);
     Player(const QAudioFormat&);
+    void playAudioFile(const QString&);
+
+protected:
+    virtual void paintEvent(QPaintEvent*);
 };

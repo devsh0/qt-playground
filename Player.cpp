@@ -1,14 +1,21 @@
 #include "Player.h"
+#include "CustomPlayButton.h"
+#include "CustomPlaylistNavButton.h"
+#include <QGraphicsDropShadowEffect>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QPainter>
+#include <QPixmap>
+#include <QPropertyAnimation>
+#include <QStyle>
 
 constexpr size_t device_notification_period = { 1000 };
 
 Player::Player(const QAudioFormat& format)
     : m_device(format, device_notification_period)
     , m_decoder(format)
-    , m_pause_button("Pause", this)
-    , m_resume_button("Resume", this)
-    , m_stop_button("Stop", this)
-    , m_change_song_button("Change", this)
+    , m_widget(new QWidget(this))
+    , m_layout(new QVBoxLayout)
 {
     setupGUI();
     connect(&m_decoder, SIGNAL(decodeFinished(const QByteArray&)), &m_device, SLOT(playSamples(const QByteArray&)));
@@ -16,22 +23,38 @@ Player::Player(const QAudioFormat& format)
 
 void Player::setupGUI()
 {
-    setFixedSize(600, 400);
+    setFixedSize(500, 400);
     setWindowTitle("Music Player");
+    main_widget().setLayout(&main_layout());
+    main_layout().setContentsMargins({0, 0, 0, 0});
 
-    int base_width = m_pause_button.width();
-    m_pause_button.move(0, 0);
-    m_pause_button.show();
-    m_resume_button.move(base_width, 0);
-    m_resume_button.show();
-    m_stop_button.move(base_width * 2, 0);
-    m_stop_button.show();
-    m_change_song_button.move(base_width * 3, 0);
-    connect(&m_pause_button, SIGNAL(clicked(bool)), this, SLOT(pausePlayback()));
-    connect(&m_resume_button, SIGNAL(clicked(bool)), this, SLOT(resumePlayback()));
-    connect(&m_stop_button, SIGNAL(clicked(bool)), this, SLOT(stopPlayback()));
-    connect(&m_change_song_button, SIGNAL(clicked(bool)), this, SLOT(setPlaybackSource()));
+    auto* play_button = new CustomPlayButton(&main_widget());
+    play_button->setFixedSize(60, 60);
+    main_layout().addWidget(play_button);
+    
+    auto* nav_left_button = new CustomPlaylistNavButton(this, true);
+    nav_left_button->setFixedSize(60, 60);
+    main_layout().addWidget(nav_left_button);
+
+    auto* nav_right_button = new CustomPlaylistNavButton(this, false);
+    nav_right_button->setFixedSize(60, 60);
+    main_layout().addWidget(nav_right_button);
+
+    setCentralWidget(&main_widget());
 }
+
+void Player::paintEvent(QPaintEvent* event)
+{
+    QPainter painter(this);
+
+    QLinearGradient gradient({300, 130}, {300, 350});
+    QColor color("#333");
+    gradient.setColorAt(0, color);
+    gradient.setColorAt(1, color.darker());
+    QRect rectangle(0, 0, 600, 400);
+    painter.fillRect(rectangle, gradient);
+}
+
 void Player::playAudioFile(const QString& source)
 {
     m_decoder.decodeFile(source);
